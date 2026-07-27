@@ -1,6 +1,5 @@
-import { Controller, Get, Post, Delete, Param, ParseIntPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { JobsService } from './jobs.service';
-import { Body } from '@nestjs/common';
 import { CreateJobDto } from './dto/create-job.dto';
 
 @Controller('jobs')
@@ -14,16 +13,12 @@ export class JobsController {
 
     @Get(':id')
     getJob(@Param('id') id: string) {
-        const job = this.jobsService.getJob(id);
-        if (!job) {
-            return { message: 'Job not found' };
-        }
-        return job;
+        return this.jobsService.getJob(id);
     }
 
     @Post()
-    async createJob(@Body() createJobDto: CreateJobDto) {
-        const jobId = await this.jobsService.createJob(createJobDto.urls);
+    createJob(@Body() createJobDto: CreateJobDto) {
+        const jobId = this.jobsService.createJob(createJobDto.urls);
 
         return { "jobId": jobId };
     }
