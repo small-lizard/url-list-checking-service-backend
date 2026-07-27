@@ -39,12 +39,12 @@ export class URLChecker {
           errorMessage: response.ok ? null : response.statusText,
         };
       })
-      .catch((error) => {
+      .catch((error: unknown) => {
         return {
           url: this.url,
           status: 'error',
           httpCode: null,
-          errorMessage: error.message,
+          errorMessage: error instanceof Error ? error.message : String(error),
         };
       });
   }

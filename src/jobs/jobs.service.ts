@@ -1,21 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { Job } from './models/job.model';
-import { URLChecker } from './models/url-checker.model';
+import { InMemoryJobsRepository } from './repositories/InMemoryJobsRepository';
 
 @Injectable()
 export class JobsService {
-    private _jobs = new Map<string, Job>();
+    constructor(private jobsRepository: InMemoryJobsRepository) { }     
 
     public createJob(urls: string[]) {
         const jobId = randomUUID();
-
-        const job: Job = new Job(
-            jobId,
-            urls.map((url) => new URLChecker(url)),
-        );
-
-        this._jobs.set(jobId, job);
+        const job = this.jobsRepository.save(jobId, urls);
 
         job.process();
 
@@ -23,7 +16,7 @@ export class JobsService {
     }
 
     public getJob(jobId: string) {
-        const job = this._jobs.get(jobId);
+        const job = this.jobsRepository.get(jobId);
         if (!job) {
             throw new NotFoundException(`No job with the ID ${jobId} found`);
         }
@@ -42,7 +35,7 @@ export class JobsService {
     }
 
     public getAllJobs() {
-        const jobsArray = Array.from(this._jobs.values());
+        const jobsArray = this.jobsRepository.getAll();
 
         const jobsSummary = jobsArray.map((job) => {
             return {
@@ -59,7 +52,7 @@ export class JobsService {
     }
 
     public cancelJob(jobId: string) {
-        const job = this._jobs.get(jobId);
+        const job = this.jobsRepository.get(jobId);
         if (!job) {
             throw new NotFoundException(`No job with the ID ${jobId} found`);
         }
